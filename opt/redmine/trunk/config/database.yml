@@ -1,0 +1,17 @@
+# https://github.com/deoren/redmine-testing
+
+# MariaDB/MySQL development instance
+
+production:
+  adapter: mysql2
+  database: redmine_trunk
+  host: localhost
+  username: redmine_trunk
+  password: redmine
+
+development:
+  adapter: mysql2
+  database: redmine_trunk
+  host: localhost
+  username: redmine_trunk
+  password: redmine

@@ -1,0 +1,13 @@
+# https://github.com/deoren/redmine-testing
+
+# Purpose: Enable upstream nginx repo/linux_packages
+#
+# Note: Relies upon /etc/apt/preferences.d/nginx to grant precedence to this
+# repo over the Phusion Passenger repo.
+#
+# http://nginx.org/en/linux_packages.html#stable
+
+# sudo wget https://nginx.org/keys/nginx_signing.key -O - | apt-key add -
+
+deb http://nginx.org/packages/ubuntu/ xenial nginx
+deb-src http://nginx.org/packages/ubuntu/ xenial nginx

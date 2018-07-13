@@ -1,0 +1,31 @@
+{
+
+    // # https://github.com/deoren/redmine-testing
+    //
+    //
+    // Purpose
+    //
+    // https://www.phusionpassenger.com/library/walkthroughs/deploy/python/ownserver/standalone/oss/xenial/deploy_app.html
+    // https://www.phusionpassenger.com/library/walkthroughs/basics/python/passenger_command.html
+    // https://www.phusionpassenger.com/library/config/standalone/reference/
+    //
+    // Tell Passenger that this is a Ruby on Rails app.
+    "app_type": "rack",
+
+    // Replace "passenger_wsgi.py" with your app's WSGI entry point file if
+    // you opted for a different filename.
+    "startup_file": "config.ru",
+
+    // The default value is "development". The other option is "production".
+    "environment": "development",
+
+    // Run Passenger on local UNIX socket unique to this web app instance
+    "socket_file": "/var/run/passenger-redmine-trunk.socket",
+
+    // Tell Passenger to daemonize into the background.
+    "daemonize": true,
+
+    // Tell Passenger to run the app as the given user. Only has effect
+    // if Passenger was started with root privileges.
+    "user": "redmine-trunk"
+}

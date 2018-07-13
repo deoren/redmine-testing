@@ -1,0 +1,20 @@
+# https://github.com/deoren/redmine-testing
+
+# Purpose:
+#
+#   Grant nginx.org repo priority for nginx and nginx related packages over other repos (#5724).
+
+# Allow the nginx.org repo to override all other repos for the nginx package by the pin-priority
+# listed below. If some other repo should set a priority higher than this, that repo will win.
+#Package: nginx
+
+# Allow ALL packages from the nginx.org repo to take precendence over all packages from all other
+# repos. This is with the mindset that we wish for this upstream nginx package provider to provider
+# nginx packages and all related packages to that one (loadable modules, helper packages, etc.).
+# If some other repo is configured with a greater pin-priority than this one, then that packages
+# from that repo will take precedence over packages from this one. The idea is that we'll only be
+# using specific packages from this repo and that this repo will not distribute "common" packages
+# that are best sourced from Ubuntu or another upstream provider.
+Package: *
+Pin: origin nginx.org
+Pin-Priority: 1001

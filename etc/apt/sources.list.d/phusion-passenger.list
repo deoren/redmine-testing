@@ -1,0 +1,24 @@
+# https://github.com/deoren/redmine-testing
+
+# Purpose: Provide access to upstream Phusion Passenger repo/Passenger packages
+#
+# https://www.phusionpassenger.com/library/install/nginx/install/oss/xenial/
+
+deb https://oss-binaries.phusionpassenger.com/apt/passenger xenial main
+
+
+###################################################
+# Steps for installing nginx + Passenger
+###################################################
+
+# Install Phusion Passenger PGP key
+# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
+
+# Refresh package listings
+# sudo apt-get update
+
+# add HTTPS support for APT
+# sudo apt-get  install apt-transport-https ca-certificates
+
+# Install nginx (official upstream) + Passenger Standalone
+# sudo apt-get install nginx passenger
