@@ -29,7 +29,7 @@ WorkingDirectory=/opt/redmine/trunk
 # working directory, which means that Passenger will use the Passenger.json
 # file from within this directory to configure the daemon for this web app.
 ExecStart=/usr/bin/passenger start --disable-security-update-check --auto
-ExecReload=/usr/bin/passenger-config restart-app /opt/redmine/mysql
+ExecReload=/usr/bin/passenger-config restart-app /opt/redmine/trunk
 ExecStop=/usr/bin/passenger stop
 
 [Install]
