@@ -126,6 +126,7 @@ sudo apt-get update ||
 
 echo "* Installing primary packages ..."
 sudo apt-get install -y \
+    software-properties-common \
     apt-transport-https \
     ca-certificates \
     nginx \
