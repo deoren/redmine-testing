@@ -39,6 +39,7 @@ REDMINE_DEST_DIR="${BASE_REDMINE_INSTALL_DIR}/trunk"
 
 THIS_DEV_ENV_GIT_REPO_URL="https://github.com/deoren/redmine-testing"
 THIS_DEV_ENV_GIT_REPO_BASENAME="$(basename ${THIS_DEV_ENV_GIT_REPO_URL})"
+THIS_DEV_ENV_GIT_REPO_BRANCH="mariadb-10.3"
 
 
 echo "* Performing initial refresh of package lists ..."
@@ -59,6 +60,9 @@ sudo rm -rf ${THIS_DEV_ENV_GIT_REPO_BASENAME}
 echo "* Cloning ${THIS_DEV_ENV_GIT_REPO_URL} ..."
 git clone ${THIS_DEV_ENV_GIT_REPO_URL} ||
     { echo "Failed to clone ${THIS_DEV_ENV_GIT_REPO_URL}. Aborting!"; exit 1; }
+
+cd ${THIS_DEV_ENV_GIT_REPO_BASENAME}
+git checkout ${THIS_DEV_ENV_GIT_REPO_BRANCH}
 
 
 ######################################################
