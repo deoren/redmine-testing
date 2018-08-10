@@ -145,12 +145,13 @@ sudo apt-get install -y \
     sqlite3 \
     python3-pip \
     sqlitebrowser \
+    libssl-dev \
     ||
         { echo "Failed to install required packages. Try again."; exit 1; }
 
 # Install MariaDB without prompts, relying on default behavior of no password
 echo "* Installing MariaDB ..."
-sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y install mariadb-server libmariadbclient-dev ||
+sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y install mariadb-server libmariadb-dev ||
     { echo "Failed to install MariaDB packages. Aborting!"; exit 1; }
 
 
