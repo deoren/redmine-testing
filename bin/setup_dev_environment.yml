@@ -75,11 +75,10 @@
       depth: 1
       dest: "{{ local_repo_dest }}"
 
-  - name: Update apt cache if needed
-    become: yes
-    apt:
-      update_cache: yes
-      cache_valid_time: 3600
+
+  #################################################
+  # Add apt repo package signing keys
+  #################################################
 
   - name: Add Nginx apt repo key
     become: yes
@@ -100,6 +99,10 @@
       keyserver: keyserver.ubuntu.com
       id: "{{ apt_key_phusion_passenger_id }}"
       state: present
+
+  #################################################
+  # Deploy repo config files
+  #################################################
 
   - name: Write apt preferences config file for upstream nginx repo
     become: yes
@@ -126,19 +129,28 @@
       dest: "/etc/apt/sources.list.d/mariadb-server.list"
 
 
-# Install packages
+  #################################################
+  # Install packages
+  #################################################
 
-- name: Install core packages
-  become: yes
-  package:
-    name: "{{ core_package_list }}"
-    state: present
+  - name: Force update of apt cache after deploying template repo config files
+    become: yes
+    apt:
+      update_cache: yes
+      #cache_valid_time: 3600
 
-- name: Install MariaDB-related packages
-  become: yes
-  package:
-    name: "{{ mariadb_package_list }}"
-    state: present
+  - name: Install core packages
+    become: yes
+    package:
+      name: "{{ core_package_list }}"
+      state: present
+
+  - name: Install MariaDB-related packages
+    become: yes
+    package:
+      name: "{{ mariadb_package_list }}"
+      state: present
+
 
 # NOTE: May need to use the 'apt' module in order to force silent installation
 # dpkg_options: 'force-confold,force-confdef'
