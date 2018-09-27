@@ -1,5 +1,4 @@
-# https://github.com/WhyAskWhy/automated-tickets
-# https://github.com/WhyAskWhy/automated-tickets-dev
+# https://github.com/redmine-testing
 
 #
 # References
@@ -19,17 +18,17 @@ PrivateTmp=no
 
 # This is only for the initial parent process. A child process will be used
 # that runs with the user/group specified in the Passenger.json file.
-User=root
-Group=root
+User={{ passenger_standalone_systemd_user }}
+Group={{ passenger_standalone_systemd_group }}
 
 # The Passenger.json file lives here with configuration options for the web app (port, user, etc.)
-WorkingDirectory=/opt/redmine/trunk
+WorkingDirectory={{ redmine_full_install_dir }}
 
 # I believe (but am not 100% sure) that all of these are executed FROM the
 # working directory, which means that Passenger will use the Passenger.json
 # file from within this directory to configure the daemon for this web app.
 ExecStart=/usr/bin/passenger start --disable-security-update-check --auto
-ExecReload=/usr/bin/passenger-config restart-app /opt/redmine/trunk
+ExecReload=/usr/bin/passenger-config restart-app {{ redmine_full_install_dir }}
 ExecStop=/usr/bin/passenger stop
 
 [Install]

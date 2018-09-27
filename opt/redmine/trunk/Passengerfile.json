@@ -20,12 +20,12 @@
     "environment": "development",
 
     // Run Passenger on local UNIX socket unique to this web app instance
-    "socket_file": "/var/run/passenger-redmine-trunk.socket",
+    "socket_file": "{{ passenger_standalone_unix_socket }}",
 
     // Tell Passenger to daemonize into the background.
     "daemonize": true,
 
     // Tell Passenger to run the app as the given user. Only has effect
     // if Passenger was started with root privileges.
-    "user": "redmine-trunk"
+    "user": "{{ passenger_standalone_service_account_user }}"
 }

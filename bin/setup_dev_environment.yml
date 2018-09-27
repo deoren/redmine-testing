@@ -32,6 +32,14 @@
 
 ---
 - hosts: localhost
+
+  # TODO: Is this even needed?
+  remote_user: root
+
+#################################################
+# Variables
+#################################################
+
   vars:
     this_repo_name: "redmine-testing"
     local_repo_dest: "/tmp/{{ this_repo_name }}"
@@ -42,6 +50,11 @@
     apt_key_nginx_url: https://nginx.org/keys/nginx_signing.key
     apt_key_mariadb_id: "0xF1656F24C74CD1D8"
     apt_key_phusion_passenger_id: "561F9B9CAC40B2F7"
+    passenger_standalone_systemd_user: root
+    passenger_standalone_systemd_group: root
+    passenger_standalone_unix_socket: /var/run/passenger-redmine-trunk.socket
+    passenger_standalone_service_account_name: redmine-trunk
+    passenger_standalone_service_account_group: redmine-trunk
     mariadb_release_version: 10.0
     core_package_list:
       - apt-transport-https
@@ -63,9 +76,11 @@
       - mariadb-server
       - libmariadbclient-dev
 
-  # TODO: Is this even needed?
-  remote_user: root
   tasks:
+
+#################################################
+# Fetch template files and other content via Git
+#################################################
 
   - name: Fetch latest version of content from Git repo
     git:
@@ -76,9 +91,9 @@
       dest: "{{ local_repo_dest }}"
 
 
-  #################################################
-  # Add apt repo package signing keys
-  #################################################
+#################################################
+# Add apt repo package signing keys
+#################################################
 
   - name: Add Nginx apt repo key
     become: yes
@@ -100,9 +115,10 @@
       id: "{{ apt_key_phusion_passenger_id }}"
       state: present
 
-  #################################################
-  # Deploy repo config files
-  #################################################
+
+#################################################
+# Deploy repo config files
+#################################################
 
   - name: Write apt preferences config file for upstream nginx repo
     become: yes
@@ -129,9 +145,41 @@
       dest: "/etc/apt/sources.list.d/mariadb-server.list"
 
 
-  #################################################
-  # Install packages
-  #################################################
+#################################################
+# Deploy Nginx config files
+#################################################
+
+# https://serverfault.com/questions/578544/deploying-a-folder-of-template-files-using-ansible
+# https://serverfault.com/a/761550
+  - name: Deploy Nginx config files
+    become: yes
+    template:
+      src: '{{ item.src }}'
+      dest: //etc/nginx/{{ item.path }}
+      force: yes
+    with_filetree: "{{ local_repo_dest }}/etc/nginx/"
+    when: item.state == 'file'
+    notify:
+     - restart nginx
+
+# https://stackoverflow.com/questions/41667864/can-the-templates-module-handle-multiple-templates-directories
+# - name: Approve certs server directories
+#   file:
+#     state: directory
+#     dest: '~/{{ item.path }}'
+#   with_filetree: '../templates'
+#   when: item.state == 'directory'
+
+# - name: Approve certs server files
+#   template:
+#     src: '{{ item.src }}'
+#     dest: '~/{{ item.path }}'
+#   with_filetree: '../templates'
+#   when: item.state == 'file'
+
+#################################################
+# Install packages
+#################################################
 
   - name: Force update of apt cache after deploying template repo config files
     become: yes
@@ -152,24 +200,46 @@
       state: present
 
 
-# NOTE: May need to use the 'apt' module in order to force silent installation
-# dpkg_options: 'force-confold,force-confdef'
+#################################################
+# Configure state of services
+#################################################
+
+  - name: Deploy systemd config for Passenger Standalone instance
+    become: yes
+    template:
+      src: "{{ local_repo_dest }}/etc/systemd/system/passenger-redmine-trunk.service"
+      dest: "/etc/systemd/system/passenger-redmine-trunk.service"
+
+  - name: Reload list of systemd unit files in order to detect Passenger Standalone
+    become: yes
+    systemd:
+      daemon_reload: yes
+
+  - name: Start Passenger Standalone, enable starting at boot
+    service:
+      name: passenger-redmine-trunk
+      state: restarted
+      enabled: yes
+
+  - name: Enable starting MariaDB at boot
+    service:
+      name: mysql
+      state: restarted
+      enabled: yes
+
+  - name: Enable starting Nginx at boot
+    service:
+      name: nginx
+      state: restarted
+      enabled: yes
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
 
 
+  # Deploy systemd config file
 
-
-  # - name: write the apache config file
-  #   template:
-  #     src: /srv/httpd.j2
-  #     dest: /etc/httpd.conf
-  #   notify:
-  #   - restart apache
-  # - name: ensure apache is running
-  #   service:
-  #     name: httpd
-  #     state: started
-  # handlers:
-  #   - name: restart apache
-  #     service:
-  #       name: httpd
-  #       state: restarted
+  # Enable services to start at boot
