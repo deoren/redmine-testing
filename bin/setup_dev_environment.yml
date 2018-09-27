@@ -38,6 +38,9 @@
     redmine_base_install_dir: "/opt/redmine"
     redmine_full_install_dir: "{{ redmine_base_install_dir }}/trunk"
     git_repo_url: "https://github.com/deoren/{{ this_repo_name }}"
+    apt_key_nginx_url: https://nginx.org/keys/nginx_signing.key
+    apt_key_mariadb_id: "0xF1656F24C74CD1D8"
+    apt_key_phusion_passenger_id: "561F9B9CAC40B2F7"
 
   remote_user: root
   tasks:
@@ -55,6 +58,21 @@
     apt:
       update_cache: yes
 
+  - name: Add Nginx apt repo key
+    #become: yes
+    apt-key:
+      url: "{{ apt_key_nginx_url }}"
+      state: present
+
+  - name: Add MariaDB apt repo key
+     # become: yes
+    id: {{ apt_key_mariadb_id }}
+    state: present
+
+  - name: Add Phusion Passenger apt repo key
+     # become: yes
+    id: {{ apt_key_phusion_passenger_id }}
+    state: present
 
   # - name: write the apache config file
   #   template:
