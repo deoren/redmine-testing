@@ -1,0 +1,31 @@
+# https://github.com/deoren/redmine-testing
+
+# Ansible version of Bash shell script used to setup Redmine test environment
+
+# This playbook will ...
+#
+# * install apt repo signing keys
+# * add upstream repos
+# ** Phusion Passenger
+# ** Nginx
+# ** MariaDB
+#
+# * install required packages
+#
+# * Execute queries against MariaDB to configure database
+# ** presumably native instead of shell command?
+#
+# * Checkout Redmine SVN repo
+#
+# * Deploy files
+# ** templates?
+#
+# * Enable (explicitly) services to start at boot
+#
+# * Install Ruby gems via bundler
+#
+# * Add user account
+#
+# * Set permissions on content
+#
+# * Deploy systemd unit file
