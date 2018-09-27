@@ -132,11 +132,13 @@
   become: yes
   package:
     name: "{{ core_package_list }}"
+    state: present
 
 - name: Install MariaDB-related packages
   become: yes
   package:
     name: "{{ mariadb_package_list }}"
+    state: present
 
 # NOTE: May need to use the 'apt' module in order to force silent installation
 # dpkg_options: 'force-confold,force-confdef'
