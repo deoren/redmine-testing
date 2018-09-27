@@ -162,6 +162,8 @@
     notify:
      - restart nginx
 
+# TODO: Will need to use the approach below as the paths have to exist first
+
 # https://stackoverflow.com/questions/41667864/can-the-templates-module-handle-multiple-templates-directories
 # - name: Approve certs server directories
 #   file:
