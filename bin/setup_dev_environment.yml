@@ -59,19 +59,19 @@
       update_cache: yes
 
   - name: Add Nginx apt repo key
-    #become: yes
+    become: yes
     apt_key:
       url: "{{ apt_key_nginx_url }}"
       state: present
 
   - name: Add MariaDB apt repo key
-     # become: yes
+    become: yes
     apt_key:
       id: "{{ apt_key_mariadb_id }}"
       state: present
 
   - name: Add Phusion Passenger apt repo key
-     # become: yes
+    become: yes
     apt_key:
       id: "{{ apt_key_phusion_passenger_id }}"
       state: present
