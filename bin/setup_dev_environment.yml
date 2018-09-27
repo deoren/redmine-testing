@@ -41,6 +41,7 @@
 
   remote_user: root
   tasks:
+
   - name: Fetch latest version of content from Git repo
     git:
       repo: "{{ git_repo_url }}"
@@ -48,9 +49,11 @@
       clone: yes
       depth: 1
       dest: "/tmp/{{ this_repo_name }}"
+
   - name: Update apt cache
     apt:
       update_cache: yes
+      become: yes
 
   # - name: write the apache config file
   #   template:
