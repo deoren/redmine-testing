@@ -53,10 +53,11 @@
       depth: 1
       dest: "/tmp/{{ this_repo_name }}"
 
-  - name: Update apt cache
+  - name: Update apt cache if needed
     become: yes
     apt:
       update_cache: yes
+      cache_valid_time: 3600
 
   - name: Add Nginx apt repo key
     become: yes
@@ -77,6 +78,8 @@
       keyserver: keyserver.ubuntu.com
       id: "{{ apt_key_phusion_passenger_id }}"
       state: present
+
+  - name: Write
 
   # - name: write the apache config file
   #   template:
