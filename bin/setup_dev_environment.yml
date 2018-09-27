@@ -34,6 +34,7 @@
 - hosts: localhost
   vars:
     this_repo_name: "redmine-testing"
+    local_repo_dest: "/tmp/{{ this_repo_name }}"
     redmine_svn_url: "http://svn.redmine.org/redmine/trunk"
     redmine_base_install_dir: "/opt/redmine"
     redmine_full_install_dir: "{{ redmine_base_install_dir }}/trunk"
@@ -41,6 +42,7 @@
     apt_key_nginx_url: https://nginx.org/keys/nginx_signing.key
     apt_key_mariadb_id: "0xF1656F24C74CD1D8"
     apt_key_phusion_passenger_id: "561F9B9CAC40B2F7"
+    mariadb_release_version: 10.0
 
   remote_user: root
   tasks:
@@ -51,7 +53,7 @@
       version: HEAD
       clone: yes
       depth: 1
-      dest: "/tmp/{{ this_repo_name }}"
+      dest: "{{ local_repo_dest }}"
 
   - name: Update apt cache if needed
     become: yes
@@ -79,7 +81,29 @@
       id: "{{ apt_key_phusion_passenger_id }}"
       state: present
 
-#  - name: Write
+  - name: Write apt preferences config file for upstream nginx repo
+    become: yes
+    template:
+      src: "{{ local_repo_dest }}/etc/apt/preferences.d/nginx"
+      dest: "/etc/apt/preferences.d/nginx"
+
+  - name: Write apt config file for upstream nginx repo
+    become: yes
+    template:
+      src: "{{ local_repo_dest }}/etc/apt/sources.list.d/nginx.list"
+      dest: "/etc/apt/sources.list.d/nginx.list"
+
+  - name: Write apt config file for upstream Phusion Passenger repo
+    become: yes
+    template:
+      src: "{{ local_repo_dest }}/etc/apt/sources.list.d/phusion-passenger.list"
+      dest: "/etc/apt/sources.list.d/phusion-passenger.list"
+
+  - name: Write apt config file for upstream MariaDB {{ mariadb_release_version }} repo
+    become: yes
+    template:
+      src: "{{ local_repo_dest }}/etc/apt/sources.list.d/mariadb-server.list"
+      dest: "/etc/apt/sources.list.d/mariadb-server.list"
 
   # - name: write the apache config file
   #   template:

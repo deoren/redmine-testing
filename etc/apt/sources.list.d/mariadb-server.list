@@ -1,13 +1,14 @@
 # https://github.com/deoren/redmine-testing
 
-# Purpose: Use upstream MariaDB packages instead of Ubuntu's outdated version
+# Purpose:
 #
-# https://mariadb.com/kb/en/mariadb/installing-mariadb-deb-files/
+#  Use upstream MariaDB packages instead of from Ubuntu (potentially outdated)
+#  https://mariadb.com/kb/en/mariadb/installing-mariadb-deb-files/
 #
 # You need to install the GPG package signing key before attempting to
 # update the package lists:
 #
 # sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
 
-deb http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu xenial main
-deb-src http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu xenial main
+deb http://nyc2.mirrors.digitalocean.com/mariadb/repo/{{ mariadb_release_version }}/ubuntu {{ ansible_distribution_release }} main
+deb-src http://nyc2.mirrors.digitalocean.com/mariadb/repo/{{ mariadb_release_version }}/ubuntu {{ ansible_distribution_release }} main

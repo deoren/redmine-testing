@@ -9,5 +9,5 @@
 
 # sudo wget https://nginx.org/keys/nginx_signing.key -O - | apt-key add -
 
-deb http://nginx.org/packages/ubuntu/ xenial nginx
-deb-src http://nginx.org/packages/ubuntu/ xenial nginx
+deb http://nginx.org/packages/ubuntu/ {{ ansible_distribution_release }} nginx
+deb-src http://nginx.org/packages/ubuntu/ {{ ansible_distribution_release }} nginx

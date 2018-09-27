@@ -4,7 +4,7 @@
 #
 # https://www.phusionpassenger.com/library/install/nginx/install/oss/xenial/
 
-deb https://oss-binaries.phusionpassenger.com/apt/passenger xenial main
+deb https://oss-binaries.phusionpassenger.com/apt/passenger {{ ansible_distribution_release }} main
 
 
 ###################################################
@@ -20,5 +20,5 @@ deb https://oss-binaries.phusionpassenger.com/apt/passenger xenial main
 # add HTTPS support for APT
 # sudo apt-get  install apt-transport-https ca-certificates
 
-# Install nginx (official upstream) + Passenger Standalone
-# sudo apt-get install nginx passenger
+# Install Passenger Standalone (nginx is installed via a separate repo)
+# sudo apt-get install passenger
