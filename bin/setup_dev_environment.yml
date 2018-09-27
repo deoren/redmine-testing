@@ -43,7 +43,7 @@
   tasks:
   - name: Fetch latest version of content from Git repo
     git:
-      repo: {{ git_repo_url }}
+      repo: "{{ git_repo_url }}"
       version: HEAD
       clone: yes
       depth: 1
