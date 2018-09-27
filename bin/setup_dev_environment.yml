@@ -29,3 +29,41 @@
 # * Set permissions on content
 #
 # * Deploy systemd unit file
+
+---
+- hosts: localhost
+  vars:
+    this_repo_name: "redmine-testing"
+    redmine_svn_url: "http://svn.redmine.org/redmine/trunk"
+    redmine_base_install_dir: "/opt/redmine"
+    redmine_full_install_dir: "{{ redmine_base_install_dir }}/trunk"
+    git_repo_url: "https://github.com/deoren/{{ this_repo_name }}"
+
+  remote_user: root
+  tasks:
+  - name: Fetch latest version of content from Git repo
+    git:
+      repo: {{ git_repo_url }}
+      version: HEAD
+      clone: yes
+      depth: 1
+      dest: "/tmp/{{ this_repo_name }}"
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+
+  # - name: write the apache config file
+  #   template:
+  #     src: /srv/httpd.j2
+  #     dest: /etc/httpd.conf
+  #   notify:
+  #   - restart apache
+  # - name: ensure apache is running
+  #   service:
+  #     name: httpd
+  #     state: started
+  # handlers:
+  #   - name: restart apache
+  #     service:
+  #       name: httpd
+  #       state: restarted
