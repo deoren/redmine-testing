@@ -67,12 +67,14 @@
   - name: Add MariaDB apt repo key
     become: yes
     apt_key:
+      keyserver: keyserver.ubuntu.com
       id: "{{ apt_key_mariadb_id }}"
       state: present
 
   - name: Add Phusion Passenger apt repo key
     become: yes
     apt_key:
+      keyserver: keyserver.ubuntu.com
       id: "{{ apt_key_phusion_passenger_id }}"
       state: present
 
