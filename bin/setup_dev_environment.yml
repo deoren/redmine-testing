@@ -262,7 +262,7 @@
       group: "{{ passenger_standalone_service_group_name }}"
       mode: 0755
     with_items:
-      - "{{ redmine_full_install_dir }}/.bundle"
+      - "{{ redmine_full_install_dir }}/vendor/bundle"
       - "{{ redmine_full_install_dir }}/vendor/bundle"
       - "{{ redmine_full_install_dir }}/tmp"
       - "{{ redmine_full_install_dir }}/tmp/pdf"
@@ -307,6 +307,8 @@
       RAILS_ENV: "{{redmine_environment}}"
 
   - name: Redmine | Run database migrations
+    become: yes
+    become_user: "{{ passenger_standalone_service_account_name }}"
     shell: bundle exec rake db:migrate
     args:
       chdir: "{{ redmine_full_install_dir }}"
@@ -314,6 +316,8 @@
       RAILS_ENV: "{{redmine_environment}}"
 
   - name: Redmine | Load initial/starter data
+    become: yes
+    become_user: "{{ passenger_standalone_service_account_name }}"
     shell: bundle exec rake redmine:load_default_data
     args:
       chdir: "{{ redmine_full_install_dir }}"
