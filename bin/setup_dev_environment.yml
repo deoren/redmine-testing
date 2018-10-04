@@ -248,11 +248,13 @@
 #################################################
 
   - name: Redmine | Checkout Subversion repository
+    become: yes
     subversion:
       repo: "{{ redmine_svn_url }}"
       dest: "{{ redmine_full_install_dir }}"
 
   - name: Redmine | Create needed directories
+    become: yes
     file:
       path: "{{ item }}"
       state: directory
