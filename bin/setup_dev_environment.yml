@@ -205,15 +205,15 @@
 
   - name: Create {{ passenger_standalone_service_group_name }} service group
     group:
-      name: {{ passenger_standalone_service_group_name }}
+      name: "{{ passenger_standalone_service_group_name }}"
       state: present
       system: yes
 
   - name: Create {{ passenger_standalone_service_account_name }} service account
     user:
-      name: {{ passenger_standalone_service_account_name }}
+      name: "{{ passenger_standalone_service_account_name }}"
       comment: Service account used by Phusion Passenger to run Redmine RoR web app
-      group: {{ passenger_standalone_service_group_name }}
+      group: "{{ passenger_standalone_service_group_name }}"
       state: present
       system: yes
 
@@ -224,15 +224,15 @@
 
   - name: MariaDB | Create {{ mysql_database_name }} db on {{ mysql_host }}
     mysql_db:
-      name: {{ mysql_database_name }}
+      name: "{{ mysql_database_name }}"
       state: present
 
   - name: MariaDB | Create {{ mysql_user_name }} user account
     mysql_user:
-      name: {{ mysql_user_name }}
-      password: {{ mysql_user_pass }}
+      name: "{{ mysql_user_name }}"
+      password: "{{ mysql_user_pass }}"
       priv: "{{mysql_database_name}}.*: ALL"
-      host: {{ mysql_host }}
+      host: "{{ mysql_host }}"
       state: present
 
 
@@ -242,15 +242,15 @@
 
   - name: Redmine | Checkout Subversion repository
     subversion:
-      repo: {{ redmine_svn_url }}
-      dest: {{ redmine_full_install_dir }}
+      repo: "{{ redmine_svn_url }}"
+      dest: "{{ redmine_full_install_dir }}"
 
   - name: Redmine | Create needed directories
     file:
       path: "{{ item }}"
       state: directory
-      owner: {{ passenger_standalone_service_account_name }}
-      group: {{ passenger_standalone_service_group_name }}
+      owner: "{{ passenger_standalone_service_account_name }}"
+      group: "{{ passenger_standalone_service_group_name }}"
       mode: 0755
     with_items:
       - "{{ redmine_full_install_dir }}/tmp"
@@ -263,7 +263,7 @@
       src: "{{ local_repo_dest }}/opt/redmine/trunk/config/database.yml"
       dest: "{{ redmine_full_install_dir }}/config/database.yml"
       owner: root
-      group: {{ passenger_standalone_service_group_name }}
+      group: "{{ passenger_standalone_service_group_name }}"
       mode: 0640
 
   - name: Redmine | Deploy Phusion Passenger Standalone config file
@@ -271,8 +271,8 @@
     template:
       src: "{{ local_repo_dest }}/opt/redmine/trunk/Passengerfile.json"
       dest: "{{ redmine_full_install_dir }}/Passengerfile.json"
-      owner: {{ passenger_standalone_service_account_name }}
-      group: {{ passenger_standalone_service_group_name }}
+      owner: "{{ passenger_standalone_service_account_name }}"
+      group: "{{ passenger_standalone_service_group_name }}"
       mode: 0644
 
   - name: Redmine | Install Ruby gems/dependencies locally instead of system-wide
@@ -313,7 +313,7 @@
       path: "{{ redmine_full_install_dir }}/db"
       state: directory
       owner: root
-      group: {{ passenger_standalone_service_group_name }}
+      group: "{{ passenger_standalone_service_group_name }}"
       mode: 0770
 
   - name: Redmine | Add execute bit to HTTP API submission script
@@ -325,8 +325,8 @@
     file:
       path: "{{ item }}"
       state: directory
-      owner: {{ passenger_standalone_service_account_name }}
-      group: {{ passenger_standalone_service_group_name }}
+      owner: "{{ passenger_standalone_service_account_name }}"
+      group: "{{ passenger_standalone_service_group_name }}"
       mode: 0755
     with_items:
       - "{{ redmine_full_install_dir }}/tmp"
