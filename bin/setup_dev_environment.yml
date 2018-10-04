@@ -271,6 +271,7 @@
 
   # Note: Required for SQLite3, completely optional for MariaDB/redmine/trunk
   - name: Redmine | Allow service account to write to database directory
+    become: yes
     file:
       path: "{{ redmine_full_install_dir }}/db"
       state: directory
