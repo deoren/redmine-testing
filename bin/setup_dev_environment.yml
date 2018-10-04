@@ -175,6 +175,8 @@
       mode: 0644
     with_filetree: '{{ local_repo_dest }}/etc/nginx/'
     when: item.state == 'file'
+    notify:
+     - restart nginx
 
 
 #################################################
@@ -376,21 +378,21 @@
     become: yes
     service:
       name: passenger-redmine-trunk
-      state: restarted
+      state: started
       enabled: yes
 
   - name: Services | Enable starting MariaDB at boot
     become: yes
     service:
       name: mysql
-      state: restarted
+      state: started
       enabled: yes
 
   - name: Services | Enable starting Nginx at boot
     become: yes
     service:
       name: nginx
-      state: restarted
+      state: started
       enabled: yes
 
   handlers:
@@ -399,8 +401,8 @@
         name: nginx
         state: restarted
 
-    - name: restart passenger-redmine-trunk
-      service:
-        name: passenger-redmine-trunk
-        state: restarted
+#    - name: restart passenger-redmine-trunk
+#      service:
+#        name: passenger-redmine-trunk
+#        state: restarted
 
