@@ -238,6 +238,7 @@
     mysql_user:
       name: "{{ mysql_user_name }}"
       password: "{{ mysql_user_pass }}"
+      update_password: on_create
       priv: "{{mysql_database_name}}.*:ALL PRIVILEGES"
       host: "{{ mysql_host }}"
       login_user: root
@@ -280,6 +281,17 @@
       owner: root
       group: "{{ passenger_standalone_service_group_name }}"
       mode: 0770
+
+  # Precreate file so that non-privileged service account can be used to
+  # install/update ruby gems.
+  - name: Redmine | Grant service account write access to Gemfile.lock file
+    become: yes
+    file:
+      path: "{{ redmine_full_install_dir }}/Gemfile.lock"
+      state: touch
+      owner: "{{ passenger_standalone_service_account_name }}"
+      group: "{{ passenger_standalone_service_group_name }}"
+      mode: 0664
 
   - name: Redmine | Deploy database config file
     become: yes
