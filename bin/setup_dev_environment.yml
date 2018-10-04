@@ -186,6 +186,9 @@
     file:
       state: directory
       dest: '/etc/{{ item.path }}'
+      owner: bin
+      group: wheel
+      mode: 0755
     with_filetree: '{{ local_repo_dest }}/etc/nginx/'
     when: item.state == 'directory'
 
@@ -194,6 +197,9 @@
     template:
       src: '{{ item.src }}'
       dest: '/etc/{{ item.path }}'
+      owner: root
+      group: root
+      mode: 0644
     with_filetree: '{{ local_repo_dest }}/etc/nginx/'
     when: item.state == 'file'
 
