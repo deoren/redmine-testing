@@ -185,23 +185,33 @@
     become: yes
     file:
       state: directory
-      dest: '/etc/{{ item.path }}'
+      dest: '/etc/nginx/{{ item.path }}'
       owner: root
       group: root
       mode: 0755
     with_filetree: '{{ local_repo_dest }}/etc/nginx/'
     when: item.state == 'directory'
 
+
+  # - name: Template complete tree
+  #   template:
+  #     src: '{{ item.src }}'
+  #     dest: /web/{{ item.path }}
+  #     force: yes
+  #   with_filetree: some/path/
+  #   when: item.state == 'file'
+
   - name: Deploy Nginx config files
     become: yes
     template:
       src: '{{ item.src }}'
-      dest: '/etc/{{ item.path }}'
+      dest: '/etc/nginx/{{ item.path }}'
       owner: root
       group: root
       mode: 0644
     with_filetree: '{{ local_repo_dest }}/etc/nginx/'
     when: item.state == 'file'
+
 
 #################################################
 # Install packages
@@ -242,18 +252,21 @@
       daemon_reload: yes
 
   - name: Start Passenger Standalone, enable starting at boot
+    become: yes
     service:
       name: passenger-redmine-trunk
       state: restarted
       enabled: yes
 
   - name: Enable starting MariaDB at boot
+    become: yes
     service:
       name: mysql
       state: restarted
       enabled: yes
 
   - name: Enable starting Nginx at boot
+    become: yes
     service:
       name: nginx
       state: restarted
@@ -265,7 +278,3 @@
         name: nginx
         state: restarted
 
-
-  # Deploy systemd config file
-
-  # Enable services to start at boot
