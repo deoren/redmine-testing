@@ -262,6 +262,7 @@
       group: "{{ passenger_standalone_service_group_name }}"
       mode: 0755
     with_items:
+      - "{{ redmine_full_install_dir }}/vendor/bundle"
       - "{{ redmine_full_install_dir }}/tmp"
       - "{{ redmine_full_install_dir }}/tmp/pdf"
       - "{{ redmine_full_install_dir }}/public/plugin_assets"
@@ -286,12 +287,14 @@
 
   - name: Redmine | Install Ruby gems/dependencies locally instead of system-wide
     bundler:
+        become: yes
+        become_user: "{{ passenger_standalone_service_account_name }}"
         chdir: "{{ redmine_full_install_dir }}"
-        state: present
-        deployment_mode: yes
+        gem_path: "{{ redmine_full_install_dir }}/vendor/bundle"
         exclude_groups:
           - "development"
           - "test"
+        state: present
 
   - name: Redmine | Generate Secret Token
     # FIXME: Shouldn't this "become" the service account first?
