@@ -269,6 +269,15 @@
       - "{{ redmine_full_install_dir }}/tmp/pdf"
       - "{{ redmine_full_install_dir }}/public/plugin_assets"
 
+  # Note: Required for SQLite3, completely optional for MariaDB/redmine/trunk
+  - name: Redmine | Allow service account to write to database directory
+    file:
+      path: "{{ redmine_full_install_dir }}/db"
+      state: directory
+      owner: root
+      group: "{{ passenger_standalone_service_group_name }}"
+      mode: 0770
+
   - name: Redmine | Deploy database config file
     become: yes
     template:
@@ -326,21 +335,14 @@
       RAILS_ENV: "{{redmine_environment}}"
       REDMINE_LANG: "en"
 
-  # Note: Required for SQLite3, completely optional for MariaDB/redmine/trunk
-  - name: Redmine | Allow service account to write to database directory
-    file:
-      path: "{{ redmine_full_install_dir }}/db"
-      state: directory
-      owner: root
-      group: "{{ passenger_standalone_service_group_name }}"
-      mode: 0770
-
   - name: Redmine | Add execute bit to HTTP API submission script
+    become: yes
     file:
       path: "{{ redmine_full_install_dir }}/extra/mail_handler/rdm-mailhandler.rb"
       mode: 0755
 
   - name: Redmine | Adjust permissions on directories post-install
+    become: yes
     file:
       path: "{{ item }}"
       state: directory
