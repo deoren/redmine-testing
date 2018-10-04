@@ -286,6 +286,7 @@
 
   - name: Redmine | Install Ruby gems/dependencies locally instead of system-wide
     bundler:
+        chdir: "{{ redmine_full_install_dir }}"
         state: present
         deployment_mode: yes
         exclude_groups:
