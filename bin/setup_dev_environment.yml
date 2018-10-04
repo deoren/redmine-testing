@@ -149,18 +149,34 @@
 # Deploy Nginx config files
 #################################################
 
-# https://serverfault.com/questions/578544/deploying-a-folder-of-template-files-using-ansible
-# https://serverfault.com/a/761550
+# http://www.mydailytutorials.com/ansible-template-module-examples/
+# https://blog.knoldus.com/ansible-playbook-using-templates/
+
   - name: Deploy Nginx config files
     become: yes
     template:
-      src: '{{ item.src }}'
-      dest: //etc/nginx/{{ item.path }}
-      force: yes
-    with_filetree: "{{ local_repo_dest }}/etc/nginx/"
-    when: item.state == 'file'
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      with_items:
+      - {src: "{{ local_repo_dest }}/etc/nginx/log_formats.conf", dest: '/etc/nginx/log_formats.conf'}
+      - {src: "{{ local_repo_dest }}/etc/nginx/nginx.conf", dest: '/etc/nginx/nginx.conf'}
+      - {src: "{{ local_repo_dest }}/etc/nginx/sites-available/redmine.conf", dest: '/etc/nginx/sites-available/redmine.conf'}
     notify:
      - restart nginx
+
+
+# https://serverfault.com/questions/578544/deploying-a-folder-of-template-files-using-ansible
+# https://serverfault.com/a/761550
+  # - name: Deploy Nginx config files
+  #   become: yes
+  #   template:
+  #     src: '{{ item.src }}'
+  #     dest: //etc/nginx/{{ item.path }}
+  #     force: yes
+  #   with_filetree: "{{ local_repo_dest }}/etc/nginx/"
+  #   when: item.state == 'file'
+  #   notify:
+  #    - restart nginx
 
 # TODO: Will need to use the approach below as the paths have to exist first
 
