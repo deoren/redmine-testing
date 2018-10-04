@@ -227,6 +227,8 @@
 
   - name: MariaDB | Create {{ mysql_database_name }} db on {{ mysql_host }}
     mysql_db:
+      login_user: root
+      login_host: "{{ mysql_host }}"
       name: "{{ mysql_database_name }}"
       state: present
 
@@ -236,6 +238,8 @@
       password: "{{ mysql_user_pass }}"
       priv: "{{mysql_database_name}}.*: ALL"
       host: "{{ mysql_host }}"
+      login_user: root
+      login_host: "{{ mysql_host }}"
       state: present
 
 
