@@ -286,9 +286,9 @@
       mode: 0644
 
   - name: Redmine | Install Ruby gems/dependencies locally instead of system-wide
+    become: yes
+    become_user: "{{ passenger_standalone_service_account_name }}"
     bundler:
-        become: yes
-        become_user: "{{ passenger_standalone_service_account_name }}"
         chdir: "{{ redmine_full_install_dir }}"
         gem_path: "{{ redmine_full_install_dir }}/vendor/bundle"
         exclude_groups:
