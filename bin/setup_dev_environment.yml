@@ -236,7 +236,7 @@
     mysql_user:
       name: "{{ mysql_user_name }}"
       password: "{{ mysql_user_pass }}"
-      priv: "{{mysql_database_name}}.*: ALL"
+      priv: "{{mysql_database_name}}.*:ALL PRIVILEGES"
       host: "{{ mysql_host }}"
       login_user: root
       login_host: "{{ mysql_host }}"
