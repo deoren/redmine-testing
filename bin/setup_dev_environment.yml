@@ -1,36 +1,9 @@
+---
+
 # https://github.com/deoren/redmine-testing
 
 # Ansible version of Bash shell script used to setup Redmine test environment
 
-# This playbook will ...
-#
-# * install apt repo signing keys
-# * add upstream repos
-# ** Phusion Passenger
-# ** Nginx
-# ** MariaDB
-#
-# * install required packages
-#
-# * Execute queries against MariaDB to configure database
-# ** presumably native instead of shell command?
-#
-# * Checkout Redmine SVN repo
-#
-# * Deploy files
-# ** templates?
-#
-# * Enable (explicitly) services to start at boot
-#
-# * Install Ruby gems via bundler
-#
-# * Add user account
-#
-# * Set permissions on content
-#
-# * Deploy systemd unit file
-
----
 - hosts: localhost
 
   # TODO: Is this even needed?
@@ -43,19 +16,30 @@
   vars:
     this_repo_name: "redmine-testing"
     local_repo_dest: "/tmp/{{ this_repo_name }}"
+    git_repo_url: "https://github.com/deoren/{{ this_repo_name }}"
+
     redmine_svn_url: "http://svn.redmine.org/redmine/trunk"
     redmine_base_install_dir: "/opt/redmine"
     redmine_full_install_dir: "{{ redmine_base_install_dir }}/trunk"
-    git_repo_url: "https://github.com/deoren/{{ this_repo_name }}"
+    redmine_environment: development
+
     apt_key_nginx_url: https://nginx.org/keys/nginx_signing.key
     apt_key_mariadb_id: "0xF1656F24C74CD1D8"
     apt_key_phusion_passenger_id: "561F9B9CAC40B2F7"
+
     passenger_standalone_systemd_user: root
     passenger_standalone_systemd_group: root
     passenger_standalone_unix_socket: /var/run/passenger-redmine-trunk.socket
     passenger_standalone_service_account_name: redmine-trunk
-    passenger_standalone_service_account_group: redmine-trunk
+    passenger_standalone_service_group_name: redmine-trunk
+
+    mysql_database_name: redmine_trunk
+    mysql_host: localhost
+    mysql_user_name: redmine_trunk
+    mysql_user_pass: redmine
+
     mariadb_release_version: 10.0
+
     core_package_list:
       - apt-transport-https
       - ca-certificates
@@ -72,6 +56,7 @@
       - sqlite3
       - python3-pip
       - sqlitebrowser
+
     mariadb_package_list:
       - mariadb-server
       - libmariadbclient-dev
@@ -82,7 +67,7 @@
 # Fetch template files and other content via Git
 #################################################
 
-  - name: Fetch latest version of content from Git repo
+  - name: GIT | Fetch latest content
     git:
       repo: "{{ git_repo_url }}"
       version: HEAD
@@ -95,20 +80,20 @@
 # Add apt repo package signing keys
 #################################################
 
-  - name: Add Nginx apt repo key
+  - name: APT | Add Nginx apt repo key
     become: yes
     apt_key:
       url: "{{ apt_key_nginx_url }}"
       state: present
 
-  - name: Add MariaDB apt repo key
+  - name: APT | Add MariaDB apt repo key
     become: yes
     apt_key:
       keyserver: keyserver.ubuntu.com
       id: "{{ apt_key_mariadb_id }}"
       state: present
 
-  - name: Add Phusion Passenger apt repo key
+  - name: APT | Add Phusion Passenger apt repo key
     become: yes
     apt_key:
       keyserver: keyserver.ubuntu.com
@@ -120,25 +105,25 @@
 # Deploy repo config files
 #################################################
 
-  - name: Write apt preferences config file for upstream nginx repo
+  - name: APT | Create preferences file for upstream nginx repo
     become: yes
     template:
       src: "{{ local_repo_dest }}/etc/apt/preferences.d/nginx"
       dest: "/etc/apt/preferences.d/nginx"
 
-  - name: Write apt config file for upstream nginx repo
+  - name: APT | Create apt config file for upstream nginx repo
     become: yes
     template:
       src: "{{ local_repo_dest }}/etc/apt/sources.list.d/nginx.list"
       dest: "/etc/apt/sources.list.d/nginx.list"
 
-  - name: Write apt config file for upstream Phusion Passenger repo
+  - name: APT | Create apt config file for upstream Phusion Passenger repo
     become: yes
     template:
       src: "{{ local_repo_dest }}/etc/apt/sources.list.d/phusion-passenger.list"
       dest: "/etc/apt/sources.list.d/phusion-passenger.list"
 
-  - name: Write apt config file for upstream MariaDB {{ mariadb_release_version }} repo
+  - name: APT | Create apt config file for upstream MariaDB {{ mariadb_release_version }} repo
     become: yes
     template:
       src: "{{ local_repo_dest }}/etc/apt/sources.list.d/mariadb-server.list"
@@ -167,21 +152,8 @@
 
 # https://serverfault.com/questions/578544/deploying-a-folder-of-template-files-using-ansible
 # https://serverfault.com/a/761550
-  # - name: Deploy Nginx config files
-  #   become: yes
-  #   template:
-  #     src: '{{ item.src }}'
-  #     dest: //etc/nginx/{{ item.path }}
-  #     force: yes
-  #   with_filetree: "{{ local_repo_dest }}/etc/nginx/"
-  #   when: item.state == 'file'
-  #   notify:
-  #    - restart nginx
-
-# TODO: Will need to use the approach below as the paths have to exist first
-
 # https://stackoverflow.com/questions/41667864/can-the-templates-module-handle-multiple-templates-directories
-  - name: Create Nginx config file directories
+  - name: Nginx | Create config file directories
     become: yes
     file:
       state: directory
@@ -192,16 +164,7 @@
     with_filetree: '{{ local_repo_dest }}/etc/nginx/'
     when: item.state == 'directory'
 
-
-  # - name: Template complete tree
-  #   template:
-  #     src: '{{ item.src }}'
-  #     dest: /web/{{ item.path }}
-  #     force: yes
-  #   with_filetree: some/path/
-  #   when: item.state == 'file'
-
-  - name: Deploy Nginx config files
+  - name: Nginx | Deploy config files
     become: yes
     template:
       src: '{{ item.src }}'
@@ -237,35 +200,171 @@
 
 
 #################################################
+# Create service account, group
+#################################################
+
+  - name: Create {{ passenger_standalone_service_group_name }} service group
+    group:
+      name: {{ passenger_standalone_service_group_name }}
+      state: present
+      system: yes
+
+  - name: Create {{ passenger_standalone_service_account_name }} service account
+    user:
+      name: {{ passenger_standalone_service_account_name }}
+      comment: Service account used by Phusion Passenger to run Redmine RoR web app
+      group: {{ passenger_standalone_service_group_name }}
+      state: present
+      system: yes
+
+
+#################################################
+# Setup MySQL user, database for Redmine use
+#################################################
+
+  - name: MariaDB | Create {{ mysql_database_name }} db on {{ mysql_host }}
+    mysql_db:
+      name: {{ mysql_database_name }}
+      state: present
+
+  - name: MariaDB | Create {{ mysql_user_name }} user account
+    mysql_user:
+      name: {{ mysql_user_name }}
+      password: {{ mysql_user_pass }}
+      priv: "{{mysql_database_name}}.*: ALL"
+      host: {{ mysql_host }}
+      state: present
+
+
+#################################################
+# Deploy Redmine
+#################################################
+
+  - name: Redmine | Checkout Subversion repository
+    subversion:
+      repo: {{ redmine_svn_url }}
+      dest: {{ redmine_full_install_dir }}
+
+  - name: Redmine | Create needed directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: {{ passenger_standalone_service_account_name }}
+      group: {{ passenger_standalone_service_group_name }}
+      mode: 0755
+    with_items:
+      - "{{ redmine_full_install_dir }}/tmp"
+      - "{{ redmine_full_install_dir }}/tmp/pdf"
+      - "{{ redmine_full_install_dir }}/public/plugin_assets"
+
+  - name: Redmine | Deploy database config file
+    become: yes
+    template:
+      src: "{{ local_repo_dest }}/opt/redmine/trunk/config/database.yml"
+      dest: "{{ redmine_full_install_dir }}/config/database.yml"
+      owner: root
+      group: {{ passenger_standalone_service_group_name }}
+      mode: 0640
+
+  - name: Redmine | Deploy Phusion Passenger Standalone config file
+    become: yes
+    template:
+      src: "{{ local_repo_dest }}/opt/redmine/trunk/Passengerfile.json"
+      dest: "{{ redmine_full_install_dir }}/Passengerfile.json"
+      owner: {{ passenger_standalone_service_account_name }}
+      group: {{ passenger_standalone_service_group_name }}
+      mode: 0644
+
+  - name: Redmine | Install Ruby gems/dependencies locally instead of system-wide
+    bundler:
+        state: present
+        deployment_mode: yes
+        exclude_groups:
+          - "development"
+          - "test"
+
+  - name: Redmine | Generate Secret Token
+    # FIXME: Shouldn't this "become" the service account first?
+    become: yes
+    shell: bundle exec rake generate_secret_token
+    args:
+      chdir: "{{ redmine_full_install_dir }}"
+    environment:
+      RAILS_ENV: "{{redmine_environment}}"
+
+  - name: Redmine | Run database migrations
+    shell: bundle exec rake db:migrate
+    args:
+      chdir: "{{ redmine_full_install_dir }}"
+    environment:
+      RAILS_ENV: "{{redmine_environment}}"
+
+  - name: Redmine | Load initial/starter data
+    shell: bundle exec rake redmine:load_default_data
+    args:
+      chdir: "{{ redmine_full_install_dir }}"
+    environment:
+      RAILS_ENV: "{{redmine_environment}}"
+      REDMINE_LANG: "en"
+
+  # Note: Required for SQLite3, completely optional for MariaDB/redmine/trunk
+  - name: Redmine | Allow service account to write to database directory
+    file:
+      path: "{{ redmine_full_install_dir }}/db"
+      state: directory
+      owner: root
+      group: {{ passenger_standalone_service_group_name }}
+      mode: 0770
+
+  - name: Redmine | Add execute bit to HTTP API submission script
+    file:
+      path: "{{ redmine_full_install_dir }}/extra/mail_handler/rdm-mailhandler.rb"
+      mode: 0755
+
+  - name: Redmine | Adjust permissions on directories post-install
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: {{ passenger_standalone_service_account_name }}
+      group: {{ passenger_standalone_service_group_name }}
+      mode: 0755
+    with_items:
+      - "{{ redmine_full_install_dir }}/tmp"
+      - "{{ redmine_full_install_dir }}/log"
+      - "{{ redmine_full_install_dir }}/files"
+      - "{{ redmine_full_install_dir }}/public/plugin_assets"
+
+
+#################################################
 # Configure state of services
 #################################################
 
-  - name: Deploy systemd config for Passenger Standalone instance
+  - name: Services | Deploy systemd config for Passenger Standalone instance
     become: yes
     template:
       src: "{{ local_repo_dest }}/etc/systemd/system/passenger-redmine-trunk.service"
       dest: "/etc/systemd/system/passenger-redmine-trunk.service"
 
-  - name: Reload list of systemd unit files in order to detect Passenger Standalone
+  - name: Services | Reload list of systemd unit files in order to detect Passenger Standalone
     become: yes
     systemd:
       daemon_reload: yes
 
-  - name: Start Passenger Standalone, enable starting at boot
+  - name: Services | Start Passenger Standalone, enable starting at boot
     become: yes
     service:
       name: passenger-redmine-trunk
       state: restarted
       enabled: yes
 
-  - name: Enable starting MariaDB at boot
+  - name: Services | Enable starting MariaDB at boot
     become: yes
     service:
       name: mysql
       state: restarted
       enabled: yes
 
-  - name: Enable starting Nginx at boot
+  - name: Services | Enable starting Nginx at boot
     become: yes
     service:
       name: nginx
@@ -276,5 +375,10 @@
     - name: restart nginx
       service:
         name: nginx
+        state: restarted
+
+    - name: restart passenger-redmine-trunk
+      service:
+        name: passenger-redmine-trunk
         state: restarted
 
