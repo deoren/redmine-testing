@@ -190,7 +190,7 @@
     when: item.state == 'directory'
 
   - name: Deploy Nginx config files
-    become: syes
+    become: yes
     template:
       src: '{{ item.src }}'
       dest: '/etc/{{ item.path }}'
