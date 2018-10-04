@@ -204,12 +204,14 @@
 #################################################
 
   - name: Create {{ passenger_standalone_service_group_name }} service group
+    become: yes
     group:
       name: "{{ passenger_standalone_service_group_name }}"
       state: present
       system: yes
 
   - name: Create {{ passenger_standalone_service_account_name }} service account
+    become: yes
     user:
       name: "{{ passenger_standalone_service_account_name }}"
       comment: Service account used by Phusion Passenger to run Redmine RoR web app
