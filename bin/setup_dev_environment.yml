@@ -262,6 +262,7 @@
       group: "{{ passenger_standalone_service_group_name }}"
       mode: 0755
     with_items:
+      - "{{ redmine_full_install_dir }}/.bundle"
       - "{{ redmine_full_install_dir }}/vendor/bundle"
       - "{{ redmine_full_install_dir }}/tmp"
       - "{{ redmine_full_install_dir }}/tmp/pdf"
