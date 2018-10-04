@@ -152,17 +152,17 @@
 # http://www.mydailytutorials.com/ansible-template-module-examples/
 # https://blog.knoldus.com/ansible-playbook-using-templates/
 
-  - name: Deploy Nginx config files
-    become: yes
-    template:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-      with_items:
-      - {src: "{{ local_repo_dest }}/etc/nginx/log_formats.conf", dest: '/etc/nginx/log_formats.conf'}
-      - {src: "{{ local_repo_dest }}/etc/nginx/nginx.conf", dest: '/etc/nginx/nginx.conf'}
-      - {src: "{{ local_repo_dest }}/etc/nginx/sites-available/redmine.conf", dest: '/etc/nginx/sites-available/redmine.conf'}
-    notify:
-     - restart nginx
+  # - name: Deploy Nginx config files
+  #   become: yes
+  #   template:
+  #     src: "{{ item.src }}"
+  #     dest: "{{ item.dest }}"
+  #   with_items:
+  #     - {src: "{{ local_repo_dest }}/etc/nginx/log_formats.conf", dest: '/etc/nginx/log_formats.conf'}
+  #     - {src: "{{ local_repo_dest }}/etc/nginx/nginx.conf", dest: '/etc/nginx/nginx.conf'}
+  #     - {src: "{{ local_repo_dest }}/etc/nginx/sites-available/redmine.conf", dest: '/etc/nginx/sites-available/redmine.conf'}
+  #   notify:
+  #    - restart nginx
 
 
 # https://serverfault.com/questions/578544/deploying-a-folder-of-template-files-using-ansible
@@ -181,19 +181,21 @@
 # TODO: Will need to use the approach below as the paths have to exist first
 
 # https://stackoverflow.com/questions/41667864/can-the-templates-module-handle-multiple-templates-directories
-# - name: Approve certs server directories
-#   file:
-#     state: directory
-#     dest: '~/{{ item.path }}'
-#   with_filetree: '../templates'
-#   when: item.state == 'directory'
+  - name: Create Nginx config file directories
+    become: yes
+    file:
+      state: directory
+      dest: '/etc/{{ item.path }}'
+    with_filetree: '{{ local_repo_dest }}/etc/nginx/'
+    when: item.state == 'directory'
 
-# - name: Approve certs server files
-#   template:
-#     src: '{{ item.src }}'
-#     dest: '~/{{ item.path }}'
-#   with_filetree: '../templates'
-#   when: item.state == 'file'
+  - name: Deploy Nginx config files
+    become: syes
+    template:
+      src: '{{ item.src }}'
+      dest: '/etc/{{ item.path }}'
+    with_filetree: '{{ local_repo_dest }}/etc/nginx/'
+    when: item.state == 'file'
 
 #################################################
 # Install packages
